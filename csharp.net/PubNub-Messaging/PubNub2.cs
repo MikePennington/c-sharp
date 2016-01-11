@@ -76,9 +76,9 @@ namespace PubNubMessaging.Core
                     ChannelName = callbackList[2].ToString(),
                 };
 
-                // Get strongly-typed object from json
-                message.Event = (T)callbackList[0];
-                
+                // TODO: How to use JsonPluggableLibrary instead of JSON.NET directly?
+                message.Event = ((JObject) callbackList[0]).ToObject<T>();
+
                 subscribeCallback(message);
             });
             var stringConnectCallback = new Action<object>(callbackObject =>
