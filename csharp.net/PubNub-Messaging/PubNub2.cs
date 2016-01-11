@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -55,66 +56,42 @@ namespace PubNubMessaging.Core
             Subscribe<T>(channel, channelGroup, subscribeCallback, connectCallback, null, errorCallback);
         }
 
-    //    public void Subscribe<T>(string channel, string channelGroup, Action<Message<T>> subscribeCallback,
-    //Action<Ack> connectCallback, Action<Ack> presenceCallback, Action<PubnubClientError> errorCallback)
-    //    {
-    //        var subscribeCallbackString = new Action<string>(json =>
-    //        {
-    //            var jArray = JArray.Parse(json);
-    //            List<object> deserializedMessage = JsonPluggableLibrary.DeserializeToListOfObject(json);
-
-    //            string actualJson = JsonPluggableLibrary.SerializeToJsonString(deserializedMessage[0]);
-    //            T actualObject2 = jArray[0].ToObject<T>();
-    //            T actualObject = (T)deserializedMessage[0];
-
-    //            var message = new Message<T>
-    //            {
-    //                Event = default(T),
-    //                Time = deserializedMessage[1].ToString(),
-    //                ChannelName = deserializedMessage[2].ToString(),
-    //            };
-    //            subscribeCallback(message);
-    //        });
-    //        var connectCallbackString = new Action<string>(json =>
-    //        {
-    //            var ack = ConvertJsonToAck<T>(json);
-    //            connectCallback(ack);
-    //        });
-    //        var presenceCallbackString = new Action<string>(json =>
-    //        {
-    //            var ack = ConvertJsonToAck<T>(json);
-    //            presenceCallback(ack);
-    //        });
-    //        pubnub.Subscribe<string>(channel, channelGroup, subscribeCallbackString, connectCallbackString,
-    //            presenceCallbackString, errorCallback);
-    //    }
-
         public void Subscribe<T>(string channel, string channelGroup, Action<Message<T>> subscribeCallback, 
             Action<Ack> connectCallback, Action<Ack> presenceCallback, Action<PubnubClientError> errorCallback)
         {
-            var stringSubscribeCallback = new Action<string>(json =>
+            var stringSubscribeCallback = new Action<object>(callbackObject =>
             {
-                //Console.WriteLine(json);
-                var jArray = JArray.Parse(json);
+                if (callbackObject == null)
+                    throw new Exception("Object is null");
+                if (callbackObject.GetType() != typeof(List<object>))
+                    throw new Exception("Object is not if type List<object>");
+
+                var callbackList = callbackObject as List<Object>;
+                if (callbackList == null || callbackList.Count < 3)
+                    throw new Exception("List has less than three items");
+                
                 var message = new Message<T>
                 {
-                    Event = jArray[0].ToObject<T>(),
-                    Time = jArray[1].ToString(),
-                    ChannelName = jArray[2].ToString(),
+                    Time = callbackList[1].ToString(),
+                    ChannelName = callbackList[2].ToString(),
                 };
+
+                // Get strongly-typed object from json
+                message.Event = (T)callbackList[0];
+                
                 subscribeCallback(message);
             });
-            var stringConnectCallback = new Action<string>(json =>
+            var stringConnectCallback = new Action<object>(callbackObject =>
             {
-                var ack = ConvertJsonToAck<T>(json);
+                var ack = ConvertListToAck<T>(callbackObject);
                 connectCallback(ack);
             });
-            var stringPresenceCallback = new Action<string>(json =>
+            var stringPresenceCallback = new Action<object>(callbackObject =>
             {
-                var ack = ConvertJsonToAck<T>(json);
+                var ack = ConvertListToAck<T>(callbackObject);
                 presenceCallback(ack);
             });
-            pubnub.Subscribe<string>(channel, channelGroup, stringSubscribeCallback, stringConnectCallback, 
+            pubnub.Subscribe<object>(channel, channelGroup, stringSubscribeCallback, stringConnectCallback, 
                 stringPresenceCallback, errorCallback);
         }
 
@@ -133,11 +110,6 @@ namespace PubNubMessaging.Core
             return pubnub.Publish(channel, message, true, publishCallback, errorCallback);
         }
 
-        //public bool Publish<T>(string channel, T message, Action<T> publishCallback, Action<PubnubClientError> errorCallback)
-        //{
-        //    return Publish<T>(channel, message, true, publishCallback, errorCallback);
-        //}
-
         public bool Publish<T>(string channel, object message, Action<Ack> publishCallback, Action<PubnubClientError> errorCallback)
         {
             return Publish<T>(channel, message, true, publishCallback, errorCallback);
@@ -148,18 +120,12 @@ namespace PubNubMessaging.Core
             return pubnub.Publish(channel, message, storeInHistory, publishCallback, errorCallback);
         }
 
-        //public bool Publish<T>(string channel, object message, bool storeInHistory, Action<T> publishCallback, Action<PubnubClientError> errorCallback)
-        //{
-        //    return pubnub.Publish<T>(channel, message, storeInHistory, publishCallback, errorCallback);
-        //}
-
         public bool Publish<T>(string channel, object message, bool storeInHistory, Action<Ack> publishCallback,
             Action<PubnubClientError> errorCallback)
         {
             var publishCallbackString = new Action<object>(callbackObject =>
             {
-                var callbackList = callbackObject as List<Object>;
-                var ack = ConvertListToAck<T>(callbackList);
+                var ack = ConvertListToAck<T>(callbackObject);
                 publishCallback(ack);
             });
             return pubnub.Publish<object>(channel, message, storeInHistory, publishCallbackString, errorCallback);
@@ -878,23 +844,12 @@ namespace PubNubMessaging.Core
 
         #region "Private Methods"
         
-        private Ack ConvertJsonToAck<T>(string json)
+        private Ack ConvertListToAck<T>(object o)
         {
-            var jArray = JArray.Parse(json);
-            var ack = new Ack
-            {
-                StatusMessage = jArray[1].ToString(),
-                ChannelName = jArray[2].ToString(),
-                Type = typeof(T)
-            };
-            int statusCode;
-            if (int.TryParse(jArray[0].ToString(), out statusCode))
-                ack.StatusCode = statusCode;
-            return ack;
-        }
+            if (o.GetType() != typeof (List<object>))
+                return null;
 
-        private Ack ConvertListToAck<T>(List<object> list)
-        {
+            var list = o as List<Object>;
             var ack = new Ack
             {
                 StatusMessage = list[1].ToString(),

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Ploeh.AutoFixture;
 using PubNubMessaging.Core;
@@ -23,9 +24,9 @@ namespace Examples
 
             pubnub.Subscribe<UserCreated>(Channel, SubscribeCallback<UserCreated>, ConnectCallback, PresenceCallback, ErrorCallback);
 
-            pubnub.Publish<UserCreated>(Channel, userCreatedEvent, PublishCallback, ErrorCallback);
+            Thread.Sleep(100);
 
-            //pubnub.Publish<string>(Channel, "this is a test", PublishCallbackObject, ErrorCallback);
+            pubnub.Publish<UserCreated>(Channel, userCreatedEvent, PublishCallback, ErrorCallback);
 
             Console.ReadKey();
         }
