@@ -18,7 +18,7 @@ namespace PubNubMessaging.Core
     public class Event<T>
     {
         public T Message { get; set; }
-        public string Time { get; set; }
+        public DateTime Time { get; set; }
         public string ChannelName { get; set; }
 
         public override string ToString()
@@ -67,7 +67,7 @@ namespace PubNubMessaging.Core
 
                 var e = new Event<T>
                 {
-                    Time = callbackList[1].ToString(),
+                    Time = MicrosecondsToDateTime(callbackList[1].ToString()),
                     ChannelName = callbackList[2].ToString(),
                 };
 
@@ -859,6 +859,16 @@ namespace PubNubMessaging.Core
             if (int.TryParse(list[0].ToString(), out statusCode))
                 ack.StatusCode = statusCode;
             return ack;
+        }
+
+        private static DateTime MicrosecondsToDateTime(string microseconds)
+        {
+            double ms;
+            if (!double.TryParse(microseconds, out ms))
+                return new DateTime();
+            DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            dtDateTime = dtDateTime.AddMilliseconds(ms / 10000);
+            return dtDateTime;
         }
 
         #endregion
