@@ -31,7 +31,7 @@ namespace Examples
             Console.ReadKey();
         }
 
-        private static void SubscribeCallback<T>(Message<UserCreated> message)
+        private static void SubscribeCallback<T>(Event<UserCreated> message)
         {
             Console.WriteLine("SubscribeCallback:\n" + message);
         }
@@ -54,11 +54,6 @@ namespace Examples
         private static void PublishCallback<T>(T message)
         {
             Console.WriteLine("PublishCallback: " + message);
-        }
-
-        private static void PublishCallbackObject(object message)
-        {
-            Console.WriteLine("PublishCallbackObject: " + message);
         }
     }
 

@@ -13,16 +13,11 @@ namespace PubNubMessaging.Core
         public string StatusMessage { get; set; }
         public string ChannelName { get; set; }
         public Type Type { get; set; }
-
-        //public bool MessageWasSent
-        //{
-        //    get { return StatusCode == 1 && StatusMessage != null && StatusMessage.ToLower() == "sent"; }
-        //}
     }
 
-    public class Message<T>
+    public class Event<T>
     {
-        public T Event { get; set; }
+        public T Message { get; set; }
         public string Time { get; set; }
         public string ChannelName { get; set; }
 
@@ -38,25 +33,25 @@ namespace PubNubMessaging.Core
 
         #region "PubNub API Channel Methods"
 
-        public void Subscribe<T>(string channel, Action<Message<T>> subscribeCallback, Action<Ack> connectCallback,
+        public void Subscribe<T>(string channel, Action<Event<T>> subscribeCallback, Action<Ack> connectCallback,
             Action<PubnubClientError> errorCallback)
         {
             Subscribe<T>(channel, "", subscribeCallback, connectCallback, null, errorCallback);
         }
 
-        public void Subscribe<T>(string channel, Action<Message<T>> subscribeCallback, Action<Ack> connectCallback,
+        public void Subscribe<T>(string channel, Action<Event<T>> subscribeCallback, Action<Ack> connectCallback,
             Action<Ack> presenceCallback, Action<PubnubClientError> errorCallback)
         {
             Subscribe<T>(channel, "", subscribeCallback, connectCallback, presenceCallback, errorCallback);
         }
 
-        public void Subscribe<T>(string channel, string channelGroup, Action<Message<T>> subscribeCallback,
+        public void Subscribe<T>(string channel, string channelGroup, Action<Event<T>> subscribeCallback,
             Action<Ack> connectCallback, Action<PubnubClientError> errorCallback)
         {
             Subscribe<T>(channel, channelGroup, subscribeCallback, connectCallback, null, errorCallback);
         }
 
-        public void Subscribe<T>(string channel, string channelGroup, Action<Message<T>> subscribeCallback, 
+        public void Subscribe<T>(string channel, string channelGroup, Action<Event<T>> subscribeCallback, 
             Action<Ack> connectCallback, Action<Ack> presenceCallback, Action<PubnubClientError> errorCallback)
         {
             var objectSubscribeCallback = new Action<object>(callbackObject =>
@@ -64,13 +59,13 @@ namespace PubNubMessaging.Core
                 if (callbackObject == null)
                     throw new Exception("Object is null");
                 if (callbackObject.GetType() != typeof(List<object>))
-                    throw new Exception("Object is not if type List<object>");
+                    throw new Exception("Object is not of type List<object>");
 
                 var callbackList = callbackObject as List<Object>;
                 if (callbackList == null || callbackList.Count < 3)
                     throw new Exception("List has less than three items");
 
-                var message = new Message<T>
+                var e = new Event<T>
                 {
                     Time = callbackList[1].ToString(),
                     ChannelName = callbackList[2].ToString(),
@@ -78,9 +73,9 @@ namespace PubNubMessaging.Core
 
                 // Get strongly-typed object from json
                 var json = JsonPluggableLibrary.SerializeToJsonString(callbackList[0]);
-                message.Event = JsonPluggableLibrary.DeserializeToObject<T>(json);
+                e.Message = JsonPluggableLibrary.DeserializeToObject<T>(json);
 
-                subscribeCallback(message);
+                subscribeCallback(e);
             });
             var objectConnectCallback = new Action<object>(callbackObject =>
             {
@@ -851,6 +846,9 @@ namespace PubNubMessaging.Core
                 return null;
 
             var list = o as List<Object>;
+            if (list == null || list.Count < 3)
+                return null;
+
             var ack = new Ack
             {
                 StatusMessage = list[1].ToString(),
