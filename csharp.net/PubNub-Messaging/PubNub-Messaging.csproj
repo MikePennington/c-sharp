@@ -163,6 +163,7 @@
     <Compile Include="LoggingMethod.cs" />
     <Compile Include="MD5.cs" />
     <Compile Include="Pubnub.cs" />
+    <Compile Include="PubNub2.cs" />
     <Compile Include="PubnubCore.cs" />
     <Compile Include="PubnubExample.cs" />
     <Compile Include="PubnubWin.cs" />

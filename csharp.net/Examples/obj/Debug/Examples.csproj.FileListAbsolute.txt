@@ -1,0 +1,11 @@
+C:\src\c-sharp\csharp.net\Examples\bin\Debug\Examples.exe.config
+C:\src\c-sharp\csharp.net\Examples\bin\Debug\Examples.exe
+C:\src\c-sharp\csharp.net\Examples\bin\Debug\Examples.pdb
+C:\src\c-sharp\csharp.net\Examples\bin\Debug\PubNubMessaging.Core.exe
+C:\src\c-sharp\csharp.net\Examples\bin\Debug\Newtonsoft.Json.dll
+C:\src\c-sharp\csharp.net\Examples\bin\Debug\PubNubMessaging.Core.pdb
+C:\src\c-sharp\csharp.net\Examples\obj\Debug\Examples.csprojResolveAssemblyReference.cache
+C:\src\c-sharp\csharp.net\Examples\obj\Debug\Examples.exe
+C:\src\c-sharp\csharp.net\Examples\obj\Debug\Examples.pdb
+C:\src\c-sharp\csharp.net\Examples\bin\Debug\Ploeh.AutoFixture.dll
+C:\src\c-sharp\csharp.net\Examples\bin\Debug\Ploeh.AutoFixture.xml
