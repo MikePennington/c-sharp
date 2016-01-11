@@ -7158,8 +7158,10 @@ namespace PubNubMessaging.Core
 		List<object> DeserializeToListOfObject (string jsonString);
 
 		object DeserializeToObject (string jsonString);
-		//T DeserializeToObject<T>(string jsonString);
-		Dictionary<string, object> DeserializeToDictionaryOfObject (string jsonString);
+		
+        T DeserializeToObject<T>(string jsonString);
+		
+        Dictionary<string, object> DeserializeToDictionaryOfObject (string jsonString);
 
         Dictionary<string, object> ConvertToDictionaryObject(object localContainer);
 
@@ -7556,7 +7558,12 @@ namespace PubNubMessaging.Core
 			return result;
 		}
 
-		public Dictionary<string, object> DeserializeToDictionaryOfObject (string jsonString)
+	    public T DeserializeToObject<T>(string jsonString)
+	    {
+	        return JsonConvert.DeserializeObject<T>(jsonString);
+	    }
+
+	    public Dictionary<string, object> DeserializeToDictionaryOfObject (string jsonString)
 		{
 			return JsonConvert.DeserializeObject<Dictionary<string, object>> (jsonString);
 		}
