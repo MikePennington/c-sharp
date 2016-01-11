@@ -25,7 +25,7 @@ namespace Examples
 
             pubnub.Publish<UserCreated>(Channel, userCreatedEvent, PublishCallback, ErrorCallback);
 
-            pubnub.Publish<string>(Channel, "this is a test", PublishCallbackObject, ErrorCallback);
+            //pubnub.Publish<string>(Channel, "this is a test", PublishCallbackObject, ErrorCallback);
 
             Console.ReadKey();
         }
