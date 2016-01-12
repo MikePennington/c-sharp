@@ -31,9 +31,9 @@ namespace Examples
             Console.ReadKey();
         }
 
-        private static void SubscribeCallback(Event<UserCreated> e)
+        private static void SubscribeCallback(Message<UserCreated> message)
         {
-            Console.WriteLine("SubscribeCallback: " + e.Message.User.Name);
+            Console.WriteLine("SubscribeCallback UserName: " + message.Data.User.Name);
         }
 
         private static void ConnectCallback(Ack ack)
@@ -51,9 +51,9 @@ namespace Examples
             Console.WriteLine("ErrorCallback: " + error);
         }
 
-        private static void PublishCallback(Ack message)
+        private static void PublishCallback(Ack ack)
         {
-            Console.WriteLine("PublishCallback: " + message);
+            Console.WriteLine("PublishCallback: " + ack);
         }
     }
 

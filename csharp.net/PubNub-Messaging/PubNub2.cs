@@ -20,9 +20,9 @@ namespace PubNubMessaging.Core
         }
     }
 
-    public class Event<T>
+    public class Message<T>
     {
-        public T Message { get; set; }
+        public T Data { get; set; }
         public DateTime Time { get; set; }
         public string ChannelName { get; set; }
 
@@ -38,25 +38,25 @@ namespace PubNubMessaging.Core
 
         #region "PubNub API Channel Methods"
 
-        public void Subscribe<T>(string channel, Action<Event<T>> subscribeCallback, Action<Ack> connectCallback,
+        public void Subscribe<T>(string channel, Action<Message<T>> subscribeCallback, Action<Ack> connectCallback,
             Action<PubnubClientError> errorCallback)
         {
             Subscribe<T>(channel, "", subscribeCallback, connectCallback, null, errorCallback);
         }
 
-        public void Subscribe<T>(string channel, Action<Event<T>> subscribeCallback, Action<Ack> connectCallback,
+        public void Subscribe<T>(string channel, Action<Message<T>> subscribeCallback, Action<Ack> connectCallback,
             Action<Ack> presenceCallback, Action<PubnubClientError> errorCallback)
         {
             Subscribe<T>(channel, "", subscribeCallback, connectCallback, presenceCallback, errorCallback);
         }
 
-        public void Subscribe<T>(string channel, string channelGroup, Action<Event<T>> subscribeCallback,
+        public void Subscribe<T>(string channel, string channelGroup, Action<Message<T>> subscribeCallback,
             Action<Ack> connectCallback, Action<PubnubClientError> errorCallback)
         {
             Subscribe<T>(channel, channelGroup, subscribeCallback, connectCallback, null, errorCallback);
         }
 
-        public void Subscribe<T>(string channel, string channelGroup, Action<Event<T>> subscribeCallback, 
+        public void Subscribe<T>(string channel, string channelGroup, Action<Message<T>> subscribeCallback, 
             Action<Ack> connectCallback, Action<Ack> presenceCallback, Action<PubnubClientError> errorCallback)
         {
             var objectSubscribeCallback = new Action<object>(callbackObject =>
@@ -70,7 +70,7 @@ namespace PubNubMessaging.Core
                 if (callbackList == null || callbackList.Count < 3)
                     throw new Exception("List has less than three items");
 
-                var e = new Event<T>
+                var message = new Message<T>
                 {
                     Time = MicrosecondsToDateTime(callbackList[1].ToString()),
                     ChannelName = callbackList[2].ToString(),
@@ -78,9 +78,9 @@ namespace PubNubMessaging.Core
 
                 // Get strongly-typed object from json
                 var json = JsonPluggableLibrary.SerializeToJsonString(callbackList[0]);
-                e.Message = JsonPluggableLibrary.DeserializeToObject<T>(json);
+                message.Data = JsonPluggableLibrary.DeserializeToObject<T>(json);
 
-                subscribeCallback(e);
+                subscribeCallback(message);
             });
             var objectConnectCallback = new Action<object>(callbackObject =>
             {
@@ -854,6 +854,7 @@ namespace PubNubMessaging.Core
             if (list == null || list.Count < 3)
                 return null;
 
+            // TODO: It seems that some Acks have 4 items in the list, but I'm not sure what they all are
             var ack = new Ack
             {
                 StatusMessage = list[1].ToString(),
