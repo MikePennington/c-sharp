@@ -13,6 +13,11 @@ namespace PubNubMessaging.Core
         public string StatusMessage { get; set; }
         public string ChannelName { get; set; }
         public Type Type { get; set; }
+
+        public override string ToString()
+        {
+            return StatusCode + " : " + StatusMessage + " : " + ChannelName;
+        }
     }
 
     public class Event<T>

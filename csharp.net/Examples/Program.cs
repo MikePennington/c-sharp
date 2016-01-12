@@ -22,7 +22,7 @@ namespace Examples
             
             var pubnub = new Pubnub2(SubscribeKey, PublishKey);
 
-            pubnub.Subscribe<UserCreated>(Channel, SubscribeCallback<UserCreated>, ConnectCallback, PresenceCallback, ErrorCallback);
+            pubnub.Subscribe<UserCreated>(Channel, SubscribeCallback, ConnectCallback, PresenceCallback, ErrorCallback);
 
             Thread.Sleep(100);
 
@@ -31,27 +31,27 @@ namespace Examples
             Console.ReadKey();
         }
 
-        private static void SubscribeCallback<T>(Event<UserCreated> message)
+        private static void SubscribeCallback(Event<UserCreated> e)
         {
-            Console.WriteLine("SubscribeCallback:\n" + message);
+            Console.WriteLine("SubscribeCallback: " + e.Message.User.Name);
         }
 
-        private static void ConnectCallback(Ack message)
+        private static void ConnectCallback(Ack ack)
         {
-            Console.WriteLine("ConnectCallback: " + message);
+            Console.WriteLine("ConnectCallback: " + ack);
         }
 
-        private static void PresenceCallback(Ack message)
+        private static void PresenceCallback(Ack ack)
         {
-            Console.WriteLine("PresenceCallback: " + message);
+            Console.WriteLine("PresenceCallback: " + ack);
         }
 
-        private static void ErrorCallback(PubnubClientError message)
+        private static void ErrorCallback(PubnubClientError error)
         {
-            Console.WriteLine("ErrorCallback: " + message);
+            Console.WriteLine("ErrorCallback: " + error);
         }
 
-        private static void PublishCallback<T>(T message)
+        private static void PublishCallback(Ack message)
         {
             Console.WriteLine("PublishCallback: " + message);
         }
